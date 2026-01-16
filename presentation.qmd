@@ -1,0 +1,104 @@
+---
+title: "An Approach to Predicting Weaning Failure in Ventilated ICU Patients"
+format:
+    revealjs:
+        theme: dark
+        slide-number: true
+        footer: "8th ESICM Datathon 2026 Team 04: Gogh4IT"
+        logo: "images/logo.svg"
+        background-transition: slide
+        highlight-style: monokai
+title-slide-attributes:
+  data-background-image: "images/logo.svg"
+  data-background-size: 500px
+  data-background-position: left 8%
+  data-background-opacity: "1.0"
+
+---
+
+## Idea
+::: {style="display: flex; align-items: center; justify-content: center; height: 400px;"}
+Predicting the occurrence of weaning failure in ventilated ICU patients from the AmsterdamUMCdb
+:::
+
+
+## Step 1: Identifying ventilation epsiodes
+
+:::{.fragment}
+```{.sql}
+case when measurement_concept_id = 3012410 then 'TV'
+       when measurement_concept_id = 36303816 then 'TVinsp'
+       when measurement_concept_id = 2000000222 then 'MVspont'
+       when measurement_concept_id = 3045410 then 'MVset'
+       when measurement_concept_id in (3022875, 3016226) then 'PEEP'
+       when measurement_concept_id = 3035822 then 'IntrinsicPEEP'
+       when measurement_concept_id = 2000000211 then 'IPEEP'
+       when measurement_concept_id = 21490581 then 'COMPL'
+       when measurement_concept_id = 21490740 then 'RESIS'
+```
+:::
+
+
+::: {.notes}
+applicable measurement_id connected to a person_id which implies some sort of mechanical ventilation at the time
+:::
+
+## Step 2: Identifying the cessation of mechanical ventilation
+
+:::{.fragment}
+```{.sql code-line-numbers="|2-5|9-12"}
+select person_id, measurement_datetime, value_as_number
+, case when measurement_concept_id = 3043148 then 'BRvent'
+     when measurement_concept_id = 3026892 then 'BRspontv'
+     when measurement_concept_id = 1175625 then 'BRspont'
+     when measurement_concept_id = 3024171 then 'RR'
+     end as measure_type
+from measurement m
+where person_id in (select person_id from vlist)
+  and measurement_concept_id in ( 3043148 --Breath rate mechanical
+                                 , 3026892 -- Breath rate spontaneous --on ventilator
+                                 , 1175625 -- Breath rate spontaneous
+                                 , 3024171 -- Respiratory rate
+                                 )
+```
+:::
+
+
+::: {.notes}
+- oxygen flow rate?
+- spontaneous respiratory rate?
+:::
+
+## Step 3: Defining the Event
+
+:::{.fragment}
+::: {style="display: flex; align-items: center; justify-content: center; height: 400px;"}
+Return to mechanical ventilation or death within 48 hours
+:::
+:::
+
+:::{.notes}
+Return to mechanical ventilation or death within 48 h is considered weaning failure (= event)
+:::
+
+## Step 4: Build Model
+:::{.fragment}
+- survuval analysis or
+- tree-based (xgboost)
+:::
+
+:::{.fragment}
+```{.sql}
+case when measurement_concept_id = 21490853 then 'ABPs'
+     when measurement_concept_id = 21490851 then 'ABPd'
+     when measurement_concept_id = 21490852 then 'ABPm'
+     when measurement_concept_id = 3000333 then 'CVPm'
+```
+:::
+
+:::{.notes}
+All sorts of parameters can serve as predictors (vital parameters, lab results, ventilator settings)
+
+:::
+
+# Thank You

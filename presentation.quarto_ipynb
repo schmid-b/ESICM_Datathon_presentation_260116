@@ -1,0 +1,64 @@
+{
+  "cells": [
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+        "---\n",
+        "title: \"An Approach to Predicting Weaning Failure in Ventilated ICU Patients\"\n",
+        "format: revealjs\n",
+        "theme: night\n",
+        "slide-number: true\n",
+        "footer: \"8th ESICM Datathon 2026 Team 04: Gogh4IT\"\n",
+        "background-transition: slide\n",
+        "title-slide-attributes:\n",
+        "  data-background-image: \"images/logo.svg\"\n",
+        "  data-background-size: 500px\n",
+        "  data-background-position: left 8%\n",
+        "  data-background-opacity: \"1.0\"\n",
+        "\n",
+        "---\n",
+        "\n",
+        "## Idea\n",
+        "\n",
+        "Predicting the occurrence of weaning failure in ventilated ICU patients from the AmsterdamUMCdb\n",
+        "\n",
+        "## Step 1\n",
+        "\n",
+        "Identifying ventilation epsiodes: applicable measurement_id connected to a person_id which implies some sort of mechanical ventilation at the time\n",
+        "- PEEP ?\n",
+        "- tidal volume ?\n",
+        "\n",
+        "## Step 2\n",
+        "Identifying the cessation of mechanical ventilation\n",
+        "- oxygen flow rate?\n",
+        "- spontaneous respiratory rate?\n",
+        "Return to mechanical ventilation or death within 48 h is considered weaning failure (= event)\n",
+        "\n",
+        "## Step 3\n",
+        "Build suitable model, e.g. survuval analysis or tree-based (xgboost)\n",
+        "All sorts of parameters can serve as predictors (vital parameters, lab results, ventilator settings)\n",
+        "\n",
+        "```{sql}\n",
+        "#| eval: false\n",
+        "\n",
+        "measurement_concept_id = 21490853 then 'ABPs'\n",
+        "     when measurement_concept_id = 21490851 then 'ABPd'\n",
+        "     when measurement_concept_id = 21490852 then 'ABPm'\n",
+        "     when measurement_concept_id = 3000333 then 'CVPm'\n",
+        "\n",
+        "```"
+      ],
+      "id": "228d0d7f"
+    }
+  ],
+  "metadata": {
+    "kernelspec": {
+      "display_name": "Python 3",
+      "language": "python",
+      "name": "python3"
+    }
+  },
+  "nbformat": 4,
+  "nbformat_minor": 5
+}
